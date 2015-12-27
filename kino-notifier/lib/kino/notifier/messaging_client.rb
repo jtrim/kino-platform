@@ -7,7 +7,8 @@ module Kino
           queue_name, Bunny.new(host: ENV['RABBITMQ_HOST'] || host), logger, stats
       end
 
-      def publish_message(message)
+      def publish_message(_message)
+        message = formatted_message(_message)
         with_channel do |ch, q|
           ch.default_exchange.publish(message, routing_key: q.name, persistent: true)
           log_message_published(message, q)
@@ -33,6 +34,14 @@ module Kino
       private
 
       attr_reader :queue_name, :connection, :logger, :stats
+
+      def formatted_message(message)
+        if message.is_a? String
+          message
+        else
+          Oj.dump(message)
+        end
+      end
 
       def with_channel
         channel = connection.tap(&:start).create_channel

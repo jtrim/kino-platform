@@ -5,6 +5,7 @@ notifier:
   links:
     - stats:stats.local
     - rabbitmq:rabbitmq.local
+    - ssh:ssh.local
   volumes_from:
     - ssh
   environment:
