@@ -1,0 +1,28 @@
+notifier:
+  build: kino-notifier
+  volumes:
+    - ./kino-notifier:/app
+  links:
+    - stats:stats.local
+    - rabbitmq:rabbitmq.local
+  volumes_from:
+    - ssh
+  environment:
+    - RABBITMQ_HOST=rabbitmq.local
+    - STATSD_HOST=stats.local
+ssh:
+  build: kino-ssh-server
+  ports: 
+    - "3500:22"
+  volumes:
+    - /home
+rabbitmq:
+  image: rabbitmq:3.5.7
+  ports:
+    - "5672"
+stats:
+  image: kamon/grafana_graphite:latest
+  ports:
+    - "8215/udp"
+    - "4000:80"
+    - "4001:81"

@@ -1,8 +1,10 @@
 module Kino
   module Notifier
     class MessagingClient
-      def initialize(queue_name, logger = Logger.new($stdout), stats = Kino::Notifier.stats)
-        @queue_name, @connection, @logger, @stats = queue_name, Bunny.new, logger, stats
+      def initialize(queue_name, logger = Logger.new($stdout),
+                     stats = Kino::Notifier.stats, host = "localhost")
+        @queue_name, @connection, @logger, @stats = \
+          queue_name, Bunny.new(host: ENV['RABBITMQ_HOST'] || host), logger, stats
       end
 
       def publish_message(message)
@@ -10,7 +12,7 @@ module Kino
           ch.default_exchange.publish(message, routing_key: q.name, persistent: true)
           log_message_published(message, q)
           stats.increment("message.produced.#{q.name}")
-          stats.gauge("message.produced.#{q.name}.payload_size", message.bytesize)
+          stats.count("message.produced.bytes.#{q.name}", message.bytesize)
         end
       end
 
@@ -18,7 +20,7 @@ module Kino
         with_channel do |ch, q|
           begin
             q.subscribe(block: true, manual_ack: true) do |delivery_info, properties, body|
-              stats.time "message.consumed.duration.#{q.name}" do
+              stats.time "message.consumed.#{q.name}" do
                 yield body
               end
               ch.ack(delivery_info.delivery_tag)
