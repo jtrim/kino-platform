@@ -7,7 +7,7 @@ module Kino
 
       def publish_message(message)
         with_channel do |ch, q|
-          ch.default_exchange.publish(message, routing_key: q.name)
+          ch.default_exchange.publish(message, routing_key: q.name, persistent: true)
           log_message_published(message, q)
         end
       end
@@ -15,8 +15,9 @@ module Kino
       def consume
         with_channel do |ch, q|
           begin
-            q.subscribe(block: true) do |delivery_info, properties, body|
+            q.subscribe(block: true, manual_ack: true) do |delivery_info, properties, body|
               yield body
+              ch.ack(delivery_info.delivery_tag)
             end
           rescue SignalException => e
             logger.info "Shutting down consumer..."
@@ -32,7 +33,7 @@ module Kino
 
       def with_channel
         channel = connection.tap(&:start).create_channel
-        queue   = channel.queue(@queue_name)
+        queue   = channel.queue(@queue_name, durable: true)
         yield channel, queue
         connection.close
       end
