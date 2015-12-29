@@ -1,8 +1,18 @@
+# Notifier Application
 Read kino-ssh-server/README.md first, then run:
 
 ```sh
 docker-compose run notifier bash -c "bin/console"
 ```
+
+# Web App
+
+``` sh
+$ cd kino_webapp
+$ mix ecto.create
+$ mix phoenix.server
+```
+
 
 TODO:
 
