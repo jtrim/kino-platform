@@ -9,10 +9,21 @@ docker-compose run notifier bash -c "bin/console"
 
 ``` sh
 $ cd kino_webapp
+$ mix deps.get
 $ mix ecto.create
+$ mix test
+$ npm install # for assets
 $ mix phoenix.server
 ```
 
+`docker-comopse` variant (from `kino-platform`):
+
+```sh
+$ docker-compose run webapp mix ecto.create
+$ docker-compose run webapp mix test
+$ docker-compose run webapp npm install # for assets
+$ docker-compose up webapp              # starts the server
+```
 
 TODO:
 

@@ -7,7 +7,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :kino_webapp, KinoWebapp.Endpoint,
-  http: [port: 4000],
+  http: [port: 4002],
   debug_errors: true,
   code_reloader: true,
   cache_static_lookup: false,
@@ -35,8 +35,8 @@ config :phoenix, :stacktrace_depth, 20
 # Configure your database
 config :kino_webapp, KinoWebapp.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "kino_webapp_dev",
-  hostname: "localhost",
+  username: (System.get_env("POSTGRES_USER") || "postgres"),
+  password: (System.get_env("POSTGRES_PASSWORD") || "postgres"),
+  database: (System.get_env("POSTGRES_DATABASE") || "kino_webapp_dev"),
+  hostname: (System.get_env("POSTGRES_HOST") || "localhost"),
   pool_size: 10

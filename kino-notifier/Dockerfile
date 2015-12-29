@@ -14,3 +14,5 @@ WORKDIR /app
 RUN bundle install
 
 ADD . .
+
+VOLUME /app

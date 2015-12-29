@@ -27,3 +27,19 @@ stats:
     - "8215/udp"
     - "4000:80"
     - "4001:81"
+postgres:
+  image: postgres:9.4.5
+  ports:
+    - "5432"
+webapp:
+  build: kino_webapp
+  ports:
+    - "4002:4002"
+    - "4003:4003"
+  links:
+    - postgres:postgres.local
+    - rabbitmq:rabbitmq.local
+  environment:
+    - POSTGRES_HOST=postgres.local
+  volumes:
+    - ./kino_webapp:/app
