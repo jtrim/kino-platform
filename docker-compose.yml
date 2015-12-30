@@ -25,8 +25,8 @@ stats:
   image: kamon/grafana_graphite:latest
   ports:
     - "8215/udp"
-    - "4000:80"
-    - "4001:81"
+    - "4002:80"
+    - "4003:81"
 postgres:
   image: postgres:9.4.5
   ports:
@@ -34,8 +34,8 @@ postgres:
 webapp:
   build: kino_webapp
   ports:
-    - "4002:4002"
-    - "4003:4003"
+    - "4000:4000"
+    - "4001:4001"
   links:
     - postgres:postgres.local
     - rabbitmq:rabbitmq.local
