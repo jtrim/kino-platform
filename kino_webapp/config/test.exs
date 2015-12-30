@@ -12,8 +12,8 @@ config :logger, level: :warn
 # Configure your database
 config :kino_webapp, KinoWebapp.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "kino_webapp_test",
-  hostname: "localhost",
+  username: (System.get_env("POSTGRES_USER") || "postgres"),
+  password: (System.get_env("POSTGRES_PASSWORD") || "postgres"),
+  database: (System.get_env("POSTGRES_DATABASE") || "kino_webapp_test"),
+  hostname: (System.get_env("POSTGRES_HOST") || "localhost"),
   pool: Ecto.Adapters.SQL.Sandbox
