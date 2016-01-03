@@ -7,12 +7,9 @@ defmodule KinoWebapp do
     import Supervisor.Spec, warn: false
 
     children = [
-      # Start the endpoint when the application starts
       supervisor(KinoWebapp.Endpoint, []),
-      # Start the Ecto repository
       worker(KinoWebapp.Repo, []),
-      # Here you could define other workers and supervisors as children
-      # worker(KinoWebapp.Worker, [arg1, arg2, arg3]),
+      worker(KinoWebapp.MessageConsumer, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
