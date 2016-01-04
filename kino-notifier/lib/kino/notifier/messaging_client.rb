@@ -1,15 +1,16 @@
 module Kino
   module Notifier
     class MessagingClient
-      def initialize(queue_name, logger = Logger.new($stdout),
-                     stats = Kino::Notifier.stats, host = "localhost")
-        @queue_name, @connection, @logger, @stats = \
-          queue_name, Bunny.new(host: ENV['RABBITMQ_HOST'] || host), logger, stats
+      def initialize(logger = Logger.new($stdout),
+                     stats  = Kino::Notifier.stats,
+                     host   = "localhost")
+        @connection, @logger, @stats = \
+          Bunny.new(host: ENV['RABBITMQ_HOST'] || host), logger, stats
       end
 
-      def publish_message(_message)
+      def publish_message(queue_name, _message)
         message = formatted_message(_message)
-        with_channel do |ch, q|
+        with_channel(queue_name) do |ch, q|
           ch.default_exchange.publish(message, routing_key: q.name, persistent: true)
           log_message_published(message, q)
           stats.increment("message.produced.#{q.name}")
@@ -17,8 +18,8 @@ module Kino
         end
       end
 
-      def consume
-        with_channel do |ch, q|
+      def consume(queue_name)
+        with_channel(queue_name) do |ch, q|
           begin
             q.subscribe(block: true, manual_ack: true) do |delivery_info, properties, body|
               stats.time "message.consumed.#{q.name}" do
@@ -33,7 +34,7 @@ module Kino
 
       private
 
-      attr_reader :queue_name, :connection, :logger, :stats
+      attr_reader :connection, :logger, :stats
 
       def formatted_message(message)
         if message.is_a? String
@@ -43,9 +44,9 @@ module Kino
         end
       end
 
-      def with_channel
+      def with_channel(queue_name)
         channel = connection.tap(&:start).create_channel
-        queue   = channel.queue(@queue_name, durable: true)
+        queue   = channel.queue(queue_name, durable: true)
         yield channel, queue
         connection.close
       end
