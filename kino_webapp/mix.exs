@@ -37,7 +37,8 @@ defmodule KinoWebapp.Mixfile do
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
      {:amqp, "0.1.4"},
-     {:poison, "~> 1.5"}]
+     {:poison, "~> 1.5"},
+     {:earmark, "~> 0.2.0"}]
 
   end
 

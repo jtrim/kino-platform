@@ -1,0 +1,9 @@
+<h1><%= @user.username %></h1>
+
+<div class="posts">
+  <%= for post <- @posts do %>
+    <div class="post">
+      <%= {:safe, KinoWebapp.Post.render_content(post)} %>
+    </div>
+  <% end %>
+</div>

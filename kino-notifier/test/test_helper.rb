@@ -5,3 +5,10 @@ require "fileutils"
 require "pry"
 
 Dir[Kino::Notifier.root.join(*%w(test support **/*.rb))].each {|f| require f }
+
+module Minitest::Assertions
+  def assert_hash_includes(expected, actual)
+    intersection = Hash[expected.to_a & actual.to_a]
+    assert_equal expected, intersection
+  end
+end

@@ -2,23 +2,38 @@ module Kino
   module Notifier
     class FileObserver
       NOTIFIABLE_FILE_EXTENSIONS = %w(md txt)
+      class ZeroLengthFileError < RuntimeError; end
 
-      def initialize(path, messaging_client = Kino::Notifier::MessagingClient.new)
-        @path, @messaging_client, @notifier = \
-          path, messaging_client, INotify::Notifier.new
+      def initialize(path, messaging_client = Kino::Notifier::MessagingClient.new, logger = Logger.new($stdout))
+        @path, @messaging_client, @notifier, @logger = \
+          path, messaging_client, INotify::Notifier.new, logger
       end
 
       def observe
         Dir["#{path}/*"].each do |path|
           notifier.watch(path, :create) do |event|
             if NOTIFIABLE_FILE_EXTENSIONS.include?(File.extname(event.name).gsub(/^\./, ''))
-              full_filepath = Pathname.new(event.watcher.path).join(event.name)
-              messaging_client.publish_message("file_created",
-                "name" => event.name,
-                "path" => event.watcher.path,
-                "created_at" => File.stat(full_filepath.to_s).ctime.to_f,
-                "contents" => File.read(full_filepath.to_s)
-              )
+              Thread.new do
+                tries = 0
+                begin
+                  full_filepath = Pathname.new(event.watcher.path).join(event.name)
+                  contents = File.read(full_filepath.to_s)
+                  raise ZeroLengthFileError if contents.empty?
+                  messaging_client.publish_message("file_created",
+                    "name" => event.name,
+                    "path" => event.watcher.path,
+                    "created_at" => File.stat(full_filepath.to_s).ctime.to_f,
+                    "contents" => contents
+                  )
+                rescue
+                  if (tries += 1) <= 3
+                    sleep 0.1
+                    retry
+                  else
+                    logger.warn("Zero length file written to disk at #{full_filepath}, ignoring...")
+                  end
+                end
+              end
             end
           end
 
@@ -40,7 +55,7 @@ module Kino
 
       private
 
-      attr_reader :path, :messaging_client, :notifier
+      attr_reader :path, :messaging_client, :notifier, :logger
     end
   end
 end
