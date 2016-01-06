@@ -17,6 +17,9 @@ defmodule KinoWebapp.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+    resources "/users", UsersController, only: [] do
+      resources "/posts", PostsController, only: [:index]
+    end
   end
 
   # Other scopes may use custom stacks.
