@@ -13,11 +13,20 @@ use Mix.Config
 # which you typically run after static files are built.
 config :kino_webapp, KinoWebapp.Endpoint,
   http: [port: {:system, "PORT"}],
-  url: [host: "example.com", port: 80],
+  url: [host: "kino-web.herokuapp.com", port: 80],
   cache_static_manifest: "priv/static/manifest.json"
 
 # Do not print debug messages in production
 config :logger, level: :info
+
+# Configure your database
+config :kino_webapp, KinoWebapp.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  username: (System.get_env("POSTGRES_USER") || "postgres"),
+  password: (System.get_env("POSTGRES_PASSWORD") || "postgres"),
+  database: (System.get_env("POSTGRES_DATABASE") || "kino_webapp_dev"),
+  hostname: (System.get_env("POSTGRES_HOST") || "localhost"),
+  pool_size: 10
 
 # ## SSL Support
 #
@@ -55,7 +64,3 @@ config :logger, level: :info
 #
 #     config :kino_webapp, KinoWebapp.Endpoint, server: true
 #
-
-# Finally import the config/prod.secret.exs
-# which should be versioned separately.
-import_config "prod.secret.exs"
