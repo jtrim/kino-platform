@@ -2,5 +2,8 @@
   "name": "Kino Web",
   "description": "Webapp for Kino",
   "image": "heroku/cedar",
-  "addons": ["cloudamqp", "heroku-postgresql"]
+  "addons": [
+    "cloudamqp",
+    "heroku-postgresql"
+  ]
 }
