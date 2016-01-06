@@ -14,6 +14,8 @@ module Kino
         clean_up_sandbox
       end
 
+      # --- file_created
+
       def test_file_created_publishes_no_messages
         start_observer_process
 
@@ -21,8 +23,6 @@ module Kino
           assert_empty @messaging_client.payloads
         end
       end
-
-      # --- file_created
 
       def test_file_created_publishes_messages
         start_observer_process_but_before do
@@ -33,6 +33,29 @@ module Kino
 
         with_retry do
           assert_equal 1, @messaging_client.payloads["file_created"].size
+        end
+      end
+
+      def test_file_created_publishes_messages_with_expected_schema
+        start_observer_process_but_before do
+          setup_user_dir("testuser")
+        end
+
+        write("contents!", "testuser", "foo.txt")
+
+        with_retry do
+          assert_hash_includes(
+            {
+              "name" => "foo.txt",
+              "path" => @tmp_observation_root.join("testuser").to_s,
+              "contents" => "contents!"
+            },
+            @messaging_client.payloads["file_created"].first
+          )
+
+          assert_kind_of \
+            Float,
+            @messaging_client.payloads["file_created"].first["created_at"]
         end
       end
 
