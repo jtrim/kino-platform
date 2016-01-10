@@ -31,15 +31,18 @@ postgres:
   image: postgres:9.4.5
   ports:
     - "5432"
-webapp:
-  build: kino_webapp
+web:
+  build: kino_web
+  working_dir: /app/user
   ports:
     - "4000:4000"
-    - "4001:4001"
   links:
     - postgres:postgres.local
     - rabbitmq:rabbitmq.local
   environment:
-    - POSTGRES_HOST=postgres.local
+    PORT: 4000
+    MIX_ENV: dev
+    AMQP_URL: amqp://guest:guest@rabbitmq.local
+    DATABASE_URL: postgres://postgres:@postgres.local:5432/kino_web_dev
   volumes:
-    - ./kino_webapp:/app
+    - ./kino_web:/app/user

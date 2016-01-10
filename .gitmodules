@@ -1,0 +1,3 @@
+[submodule "kino_web"]
+	path = kino_web
+	url = git@github.com:jtrim/kino_web.git
