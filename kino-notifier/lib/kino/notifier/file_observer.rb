@@ -10,28 +10,26 @@ module Kino
       end
 
       def observe
-        Dir["#{path}/*"].each do |path|
-          notifier.watch(path, :create) do |event|
-            if NOTIFIABLE_FILE_EXTENSIONS.include?(File.extname(event.name).gsub(/^\./, ''))
-              Thread.new do
-                tries = 0
-                begin
-                  full_filepath = Pathname.new(event.watcher.path).join(event.name)
-                  contents = File.read(full_filepath.to_s)
-                  raise ZeroLengthFileError if contents.empty?
-                  messaging_client.publish_message("file_created",
-                    "name" => event.name,
-                    "path" => event.watcher.path,
-                    "created_at" => File.stat(full_filepath.to_s).ctime.to_f,
-                    "contents" => contents
-                  )
-                rescue
-                  if (tries += 1) <= 3
-                    sleep 0.1
-                    retry
-                  else
-                    logger.warn("Zero length file written to disk at #{full_filepath}, ignoring...")
-                  end
+        notifier.watch(path, :create) do |event|
+          if NOTIFIABLE_FILE_EXTENSIONS.include?(File.extname(event.name).gsub(/^\./, ''))
+            Thread.new do
+              tries = 0
+              begin
+                full_filepath = Pathname.new(event.watcher.path).join(event.name)
+                contents = File.read(full_filepath.to_s)
+                raise ZeroLengthFileError if contents.empty?
+                messaging_client.publish_message("file_created",
+                  "name" => event.name,
+                  "path" => event.watcher.path,
+                  "created_at" => File.stat(full_filepath.to_s).ctime.to_f,
+                  "contents" => contents
+                )
+              rescue
+                if (tries += 1) <= 3
+                  sleep 0.1
+                  retry
+                else
+                  logger.warn("Zero length file written to disk at #{full_filepath}, ignoring...")
                 end
               end
             end

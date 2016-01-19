@@ -9,6 +9,7 @@ require "oj"
 require "kino/notifier/version"
 require "kino/notifier/messaging_client"
 require "kino/notifier/file_observer"
+require "kino/notifier/daemon"
 
 module Kino
   module Notifier
