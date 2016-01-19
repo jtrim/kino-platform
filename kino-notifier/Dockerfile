@@ -11,8 +11,10 @@ ADD lib/kino/notifier/version.rb /app/lib/kino/notifier/version.rb
 
 WORKDIR /app
 
-RUN bundle install
+RUN bundle install --path .bundle
 
 ADD . .
 
 VOLUME /app
+
+CMD ["bundle", "exec", "bin/kino-notifier"]

@@ -53,10 +53,10 @@ module Kino
 
       def log_message_published(message, q)
         truncated_message = \
-          if message.size > 20
-            "#{message[0..20]}..."
-          else
+          if (!ENV['DEBUG'].nil?) || message.size <= 20
             message
+          else
+            "#{message[0..20]}..."
           end
         logger.info("#{self.class.name}: Published '#{truncated_message}' to #{q.name}")
       end
